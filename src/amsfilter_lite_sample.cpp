@@ -44,10 +44,9 @@ int32_t main() {
     // Which CUDA device to use?
     u32 cuda_device = 0;
 
-    // The function 'batch_probe_cuda' return a probe instance. While the
+    // The function batch_probe_cuda returns a probe instance. While the
     // probe instance is created, the Bloom filter is copied to the device
-    // memory. Thus, the insert function must not be called after a probe
-    // instance has been created.
+    // memory. Thus, the insert function must not be called afterwards.
     auto cuda_probe = af.batch_probe_cuda(max_batch_size, cuda_device);
 
     // Start probing (asynchronously).
