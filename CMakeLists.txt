@@ -10,7 +10,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -march=native -fext-numeric-l
 include_directories(../dtl/src)
 include_directories(../dtl/thirdparty)
 
-# Include the AMS-Filter (which is part of the DTL).
+# Include the AMS-Filter.
+set(AMSFILTER_NO_MAGIC 1) # Disables MAGIC addressing.
+set(AMSFILTER_PARTIAL_BUILD 0) # Compiles only a small number of filters.
 add_subdirectory(../dtl/amsfilter amsfilter)
 include_directories(../dtl/amsfilter/src)
 set_target_properties(amsfilter PROPERTIES COMPILE_FLAGS "-march=native")
@@ -66,11 +68,30 @@ else()
 endif()
 
 set(SOURCE_FILES
-        src/amsfilter_lite_sample.cpp
+
         )
 
-cuda_add_executable(amsfilter_lite_sample ${SOURCE_FILES})
+cuda_add_executable(amsfilter_lite_sample src/amsfilter_lite_sample.cpp)
 set_target_properties(amsfilter_lite_sample
         PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 set_target_properties(amsfilter_lite_sample PROPERTIES COMPILE_FLAGS "-march=native")
 target_link_libraries(amsfilter_lite_sample ${LIBS} amsfilter)
+
+cuda_add_executable(amsfilter_lite_benchmark_device src/benchmark_device.cpp)
+set_target_properties(amsfilter_lite_benchmark_device
+        PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+set_target_properties(amsfilter_lite_benchmark_device PROPERTIES COMPILE_FLAGS "-march=native")
+target_link_libraries(amsfilter_lite_benchmark_device ${LIBS} amsfilter)
+
+cuda_add_executable(amsfilter_lite_benchmark_host src/benchmark_host.cpp)
+set_target_properties(amsfilter_lite_benchmark_host
+        PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+set_target_properties(amsfilter_lite_benchmark_host PROPERTIES COMPILE_FLAGS "-march=native")
+target_link_libraries(amsfilter_lite_benchmark_host ${LIBS} amsfilter)
+
+cuda_add_executable(amsfilter_lite_benchmark_coproc src/benchmark_coproc.cpp)
+set_target_properties(amsfilter_lite_benchmark_coproc
+        PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+set_target_properties(amsfilter_lite_benchmark_coproc PROPERTIES COMPILE_FLAGS "-march=native")
+target_link_libraries(amsfilter_lite_benchmark_coproc ${LIBS} amsfilter)
+
