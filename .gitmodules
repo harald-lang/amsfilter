@@ -1,0 +1,4 @@
+[submodule "dtl"]
+	path = thirdparty/dtl
+	url = git@github.com:peterboncz/bloomfilter-bsd.git
+	branch = gpu

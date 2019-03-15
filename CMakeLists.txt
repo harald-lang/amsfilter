@@ -7,13 +7,13 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -march=native -fext-numeric-literals -Wall -Wno-deprecated -Wno-endif-labels -Wno-unused-function -DSQLITE_ENABLE_JSON1 -DSQLITE_OMIT_LOAD_EXTENSION")
 
 # Database Template Library (DTL)
-include_directories(../dtl/src)
-include_directories(../dtl/thirdparty)
+include_directories(thirdparty/dtl/src)
+include_directories(thirdparty/dtl/thirdparty)
 
 # Include the AMS-Filter.
 set(AMSFILTER_NO_MAGIC 1) # Disables MAGIC addressing.
 set(AMSFILTER_PARTIAL_BUILD 0) # Compiles only a small number of filters.
-add_subdirectory(../dtl/amsfilter amsfilter)
+add_subdirectory(thirdparty/dtl/amsfilter amsfilter)
 include_directories(../dtl/amsfilter/src)
 set_target_properties(amsfilter PROPERTIES COMPILE_FLAGS "-march=native")
 
@@ -23,9 +23,9 @@ set(LIBS
         )
 
 
-#===----------------------------------------------------------------------===#
+#===------------------------------------------------------------------------===#
 # CUDA
-#===----------------------------------------------------------------------===#
+#===------------------------------------------------------------------------===#
 find_package(CUDA 9)
 
 if (CUDA_FOUND)
