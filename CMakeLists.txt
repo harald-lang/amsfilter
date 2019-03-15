@@ -14,7 +14,7 @@ include_directories(thirdparty/dtl/thirdparty)
 set(AMSFILTER_NO_MAGIC 1) # Disables MAGIC addressing.
 set(AMSFILTER_PARTIAL_BUILD 0) # Compiles only a small number of filters.
 add_subdirectory(thirdparty/dtl/amsfilter amsfilter)
-include_directories(../dtl/amsfilter/src)
+include_directories(thirdparty/dtl/amsfilter/src)
 set_target_properties(amsfilter PROPERTIES COMPILE_FLAGS "-march=native")
 
 set(LIBS
