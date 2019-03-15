@@ -66,7 +66,7 @@ int32_t main() {
     std::cout << "host:" << std::endl;
     auto probe = af.batch_probe(max_batch_size);
     probe(keys.data(), key_cnt);
-    // The 'wait' function always retuns true, because the batch probe on a CPU
+    // The wait function always returns true, because the batch probe on a CPU
     // is executed synchronously.
     probe.wait();
     auto result_bitmap = probe.get_results();

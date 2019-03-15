@@ -9,16 +9,18 @@
 #include <dtl/env.hpp>
 #include <dtl/thread.hpp>
 
+#include "util.hpp"
+
 //===----------------------------------------------------------------------===//
 // Read the CPU affinity of this process.
 static const auto cpu_mask = dtl::this_thread::get_cpu_affinity();
 //===----------------------------------------------------------------------===//
 void __attribute__((noinline))
-end_to_end_benchmark(
+benchmark(
     const amsfilter::Config config,
     const std::size_t m,
-    amsfilter::key_t* to_insert, const std::size_t to_insert_cnt,
-    amsfilter::key_t* to_lookup, const std::size_t to_lookup_cnt,
+    const amsfilter::key_t* to_insert, const std::size_t to_insert_cnt,
+    const amsfilter::key_t* to_lookup, const std::size_t to_lookup_cnt,
     const std::size_t host_batch_size,
     const std::size_t device_batch_size,
     const std::vector<$u32> cuda_devices,
@@ -182,38 +184,12 @@ end_to_end_benchmark(
   }
 };
 //===----------------------------------------------------------------------===//
-template<typename It>
-void
-gen_data(It begin, It end) {
-  std::random_device rnd_device;
-  std::mt19937 gen(rnd_device());
-  std::uniform_int_distribution<amsfilter::key_t> dis;
-
-  for (auto it = begin; it != end; ++it) {
-    *it = dis(gen);
-  }
-}
-//===----------------------------------------------------------------------===//
-std::string
-get_cuda_device_name(u32 cuda_device_no) {
-  cudaDeviceProp device_prop;
-  cudaGetDeviceProperties(&device_prop, cuda_device_no);
-  return std::string(device_prop.name);
-}
-//===----------------------------------------------------------------------===//
 int32_t main() {
-  std::string bbf_config_str = dtl::env<std::string>::get("CONFIG", "1,1,1,4");
-  typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-  boost::char_separator<char> sep{","};
-  tokenizer config_tok{bbf_config_str, sep};
-  auto config_tok_it = config_tok.begin();
+  cudaDeviceSetCacheConfig(cudaFuncCachePreferShared);
 
   // The filter parameters.
-  amsfilter::Config config;
-  config.word_cnt_per_block = u32(std::stoul(*config_tok_it)); config_tok_it++;
-  config.sector_cnt = u32(std::stoul(*config_tok_it)); config_tok_it++;
-  config.zone_cnt = u32(std::stoul(*config_tok_it)); config_tok_it++;
-  config.k = u32(std::stoul(*config_tok_it)); config_tok_it++;
+  std::string bbf_config_str = dtl::env<std::string>::get("CONFIG", "1,1,1,4");
+  amsfilter::Config config = parse_filter_config(bbf_config_str);
 
   std::cout << "Filter parameters: w=" << config.word_cnt_per_block
       << ", s=" << config.sector_cnt << ", z=" << config.zone_cnt << ", k="
@@ -232,6 +208,7 @@ int32_t main() {
 
   std::string devices_str = dtl::env<std::string>::get("DEVICE_NO", "0");
   typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+  boost::char_separator<char> sep{","};
   tokenizer devices_tok{devices_str, sep};
   std::vector<$u32> devices;
   std::cout << "Devices:";
@@ -246,7 +223,7 @@ int32_t main() {
   std::cout << "using " << thread_cnt << " thread(s) " << std::endl;
 
   int32_t coproc_thread_cnt =
-      devices.size() == 0
+      devices.empty()
           ? 0
           : std::min(
               thread_cnt,
@@ -269,15 +246,16 @@ int32_t main() {
   amsfilter::key_t* to_lookup_ptr = nullptr;
 
   if (keys_in_pinned_memory) {
-    std::cout << "keys in pinned memory" << std::endl;
+    std::cout << "Keys in pinned memory" << std::endl;
     amsfilter::key_t* to_lookup_pinned;
     std::size_t size = to_lookup.size() * sizeof(amsfilter::key_t);
     cudaMallocHost(&to_lookup_pinned, size, cudaHostAllocPortable);
     std::copy(to_lookup.begin(), to_lookup.end(), to_lookup_pinned);
     to_lookup_ptr = to_lookup_pinned;
+    to_lookup.clear();
   }
   else {
-    std::cout << "keys in pageable memory" << std::endl;
+    std::cout << "Keys in pageable memory" << std::endl;
     to_lookup_ptr = to_lookup.data();
   }
 
@@ -304,11 +282,11 @@ int32_t main() {
   auto run_end_to_end_benchmark = [&](
       const std::size_t m,
       const std::size_t thread_cnt) {
-    end_to_end_benchmark(
+    benchmark(
         config,
         m,
         to_insert.data(), to_insert.size(),
-        to_lookup_ptr, to_lookup.size(),
+        to_lookup_ptr, to_lookup_cnt,
         host_batch_size,
         device_batch_size,
         devices,

@@ -67,9 +67,6 @@ else()
     message("CUDA found")
 endif()
 
-set(SOURCE_FILES
-
-        )
 
 cuda_add_executable(amsfilter_lite_sample src/amsfilter_lite_sample.cpp)
 set_target_properties(amsfilter_lite_sample

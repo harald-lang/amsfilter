@@ -8,6 +8,8 @@
 #include <boost/tokenizer.hpp>
 #include <dtl/env.hpp>
 
+#include "util.hpp"
+
 //===----------------------------------------------------------------------===//
 void __attribute__((noinline))
 benchmark(
@@ -140,18 +142,6 @@ benchmark(
   }
 };
 //===----------------------------------------------------------------------===//
-template<typename It>
-void
-gen_data(It begin, It end) {
-  std::random_device rnd_device;
-  std::mt19937 gen(rnd_device());
-  std::uniform_int_distribution<amsfilter::key_t> dis;
-
-  for (auto it = begin; it != end; ++it) {
-    *it = dis(gen);
-  }
-}
-//===----------------------------------------------------------------------===//
 std::string
 get_cuda_device_name(u32 cuda_device_no) {
   cudaDeviceProp device_prop;
@@ -162,36 +152,28 @@ get_cuda_device_name(u32 cuda_device_no) {
 int32_t main() {
   cudaDeviceSetCacheConfig(cudaFuncCachePreferShared);
 
-  std::string bbf_config_str = dtl::env<std::string>::get("CONFIG", "1,1,1,4");
-  typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-  boost::char_separator<char> sep{","};
-  tokenizer tok{bbf_config_str, sep};
-  auto tok_it = tok.begin();
-
   // The filter parameters.
-  amsfilter::Config config;
-  config.word_cnt_per_block = u32(std::stoul(*tok_it)); tok_it++;
-  config.sector_cnt = u32(std::stoul(*tok_it)); tok_it++;
-  config.zone_cnt = u32(std::stoul(*tok_it)); tok_it++;
-  config.k = u32(std::stoul(*tok_it)); tok_it++;
+  std::string bbf_config_str = dtl::env<std::string>::get("CONFIG", "1,1,1,4");
+  amsfilter::Config config = parse_filter_config(bbf_config_str);
 
   std::cout << "Filter parameters: w=" << config.word_cnt_per_block
       << ", s=" << config.sector_cnt << ", z=" << config.zone_cnt << ", k="
       << config.k << std::endl;
 
-  std::size_t batch_size = 1ull << dtl::env<std::size_t>::get("BATCH_SIZE_LOG2", 20);
-  std::cout << "Batch size: 2^" << dtl::env<std::size_t>::get("BATCH_SIZE_LOG2", 20)
-      << std::endl;
+  std::size_t batch_size_log2 = dtl::env<std::size_t>::get("BATCH_SIZE_LOG2", 20);
+  std::size_t batch_size = 1ull << batch_size_log2;
+  std::cout << "Batch size: 2^" << batch_size_log2 << std::endl;
 
   int32_t cuda_device_no = dtl::env<int32_t>::get("DEVICE_NO", 0);
   std::cout << "using CUDA device no. " << cuda_device_no
       << " (" << get_cuda_device_name(cuda_device_no) << ")" << std::endl;
 
-  std::size_t to_insert_cnt = 1ull << dtl::env<std::size_t>::get("INSERT_CNT_LOG2", 24);
+  std::size_t to_insert_cnt_log2 = dtl::env<std::size_t>::get("INSERT_CNT_LOG2", 24);
+  std::size_t to_insert_cnt = 1ull << to_insert_cnt_log2;
   std::size_t to_lookup_cnt_log2 = dtl::env<std::size_t>::get("LOOKUP_CNT_LOG2", 28);
   std::size_t to_lookup_cnt = 1ull << to_lookup_cnt_log2;
 
-  bool keys_in_pinned_memory = dtl::env<$i32>::get("KEYS_PINNED", 0) != 0;
+  bool keys_in_pinned_memory = dtl::env<$i32>::get("KEYS_PINNED", 1) != 0;
 
   std::vector<amsfilter::key_t> to_insert(to_insert_cnt);
   std::vector<amsfilter::key_t> to_lookup(to_lookup_cnt);
@@ -199,19 +181,19 @@ int32_t main() {
   gen_data(to_insert.begin(), to_insert.end());
   gen_data(to_lookup.begin(), to_lookup.end());
 
-
   amsfilter::key_t* to_lookup_ptr = nullptr;
 
   if (keys_in_pinned_memory) {
-    std::cout << "keys in pinned memory" << std::endl;
+    std::cout << "Keys in pinned memory" << std::endl;
     amsfilter::key_t* to_lookup_pinned;
     std::size_t size = to_lookup.size() * sizeof(amsfilter::key_t);
     cudaMallocHost(&to_lookup_pinned, size, cudaHostAllocPortable);
     std::copy(to_lookup.begin(), to_lookup.end(), to_lookup_pinned);
     to_lookup_ptr = to_lookup_pinned;
+    to_lookup.clear();
   }
   else {
-    std::cout << "keys in pageable memory" << std::endl;
+    std::cout << "Keys in pageable memory" << std::endl;
     to_lookup_ptr = to_lookup.data();
   }
 
@@ -240,7 +222,7 @@ int32_t main() {
         config,
         m,
         to_insert.data(), to_insert.size(),
-        to_lookup_ptr, to_lookup.size(),
+        to_lookup_ptr, to_lookup_cnt,
         batch_size,
         cuda_stream_cnt,
         cuda_device_no

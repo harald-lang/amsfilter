@@ -9,6 +9,8 @@
 #include <dtl/env.hpp>
 #include <dtl/thread.hpp>
 
+#include "util.hpp"
+
 //===----------------------------------------------------------------------===//
 // Read the CPU affinity of this process.
 static const auto cpu_mask = dtl::this_thread::get_cpu_affinity();
@@ -85,48 +87,28 @@ benchmark(
   }
 };
 //===----------------------------------------------------------------------===//
-template<typename It>
-void
-gen_data(It begin, It end) {
-  std::random_device rnd_device;
-  std::mt19937 gen(rnd_device());
-  std::uniform_int_distribution<amsfilter::key_t> dis;
-
-  for (auto it = begin; it != end; ++it) {
-    *it = dis(gen);
-  }
-}
-//===----------------------------------------------------------------------===//
 int32_t main() {
-  std::string bbf_config_str = dtl::env<std::string>::get("CONFIG", "1,1,1,4");
-  typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-  boost::char_separator<char> sep{","};
-  tokenizer tok{bbf_config_str, sep};
-  auto tok_it = tok.begin();
-
   // The filter parameters.
-  amsfilter::Config config;
-  config.word_cnt_per_block = u32(std::stoul(*tok_it)); tok_it++;
-  config.sector_cnt = u32(std::stoul(*tok_it)); tok_it++;
-  config.zone_cnt = u32(std::stoul(*tok_it)); tok_it++;
-  config.k = u32(std::stoul(*tok_it)); tok_it++;
+  std::string bbf_config_str = dtl::env<std::string>::get("CONFIG", "1,1,1,4");
+  amsfilter::Config config = parse_filter_config(bbf_config_str);
 
   std::cout << "Filter parameters: w=" << config.word_cnt_per_block
       << ", s=" << config.sector_cnt << ", z=" << config.zone_cnt << ", k="
       << config.k << std::endl;
 
-  std::size_t batch_size = 1ull << dtl::env<std::size_t>::get("BATCH_SIZE_LOG2", 10);
-  std::cout << "Batch size: 2^" << dtl::env<std::size_t>::get("BATCH_SIZE_LOG2", 10)
-      << std::endl;
+  std::size_t batch_size_log2 = dtl::env<std::size_t>::get("BATCH_SIZE_LOG2", 10);
+  std::size_t batch_size = 1ull << batch_size_log2;
+  std::cout << "Batch size: 2^" << batch_size_log2 << std::endl;
 
   int32_t thread_cnt = dtl::env<int32_t>::get("THREAD_CNT", cpu_mask.count());
   std::cout << "using " << thread_cnt << " thread(s) " << std::endl;
 
-  std::size_t to_insert_cnt = 1ull << dtl::env<std::size_t>::get("INSERT_CNT_LOG2", 24);
+  std::size_t to_insert_cnt_log2 = dtl::env<std::size_t>::get("INSERT_CNT_LOG2", 24);
+  std::size_t to_insert_cnt = 1ull << to_insert_cnt_log2;
   std::size_t to_lookup_cnt_log2 = dtl::env<std::size_t>::get("LOOKUP_CNT_LOG2", 28);
   std::size_t to_lookup_cnt = 1ull << to_lookup_cnt_log2;
 
-  bool keys_in_pinned_memory = dtl::env<$i32>::get("KEYS_PINNED", 0) != 0;
+  bool keys_in_pinned_memory = dtl::env<$i32>::get("KEYS_PINNED", 1) != 0;
 
   std::vector<amsfilter::key_t> to_insert(to_insert_cnt);
   std::vector<amsfilter::key_t> to_lookup(to_lookup_cnt);
@@ -138,19 +120,18 @@ int32_t main() {
   amsfilter::key_t* to_lookup_ptr = nullptr;
 
   if (keys_in_pinned_memory) {
-    std::cout << "keys in pinned memory" << std::endl;
+    std::cout << "Keys in pinned memory" << std::endl;
     amsfilter::key_t* to_lookup_pinned;
     std::size_t size = to_lookup.size() * sizeof(amsfilter::key_t);
     cudaMallocHost(&to_lookup_pinned, size, cudaHostAllocPortable);
     std::copy(to_lookup.begin(), to_lookup.end(), to_lookup_pinned);
     to_lookup_ptr = to_lookup_pinned;
+    to_lookup.clear();
   }
   else {
-    std::cout << "keys in pageable memory" << std::endl;
+    std::cout << "Keys in pageable memory" << std::endl;
     to_lookup_ptr = to_lookup.data();
   }
-
-  std::string benchmark_mode = dtl::env<std::string>::get("MODE", "END2END");
 
   // The filter size in bits.
   std::vector<std::size_t> filter_sizes {
@@ -177,7 +158,7 @@ int32_t main() {
         config,
         m,
         to_insert.data(), to_insert.size(),
-        to_lookup_ptr, to_lookup.size(),
+        to_lookup_ptr, to_lookup_cnt,
         batch_size,
         thread_cnt
     );
