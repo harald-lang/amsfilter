@@ -67,7 +67,7 @@ The benchmarks are parameterized through environment variables which are describ
 
 ### Example
 
-The following examples show how to benchmark a cache-sectorized Bloom filter
+The following examples shows how to benchmark a cache-sectorized Bloom filter
  using all CPU cores and two GPU devices:
 ```
 CONFIG=32,32,2,8 DEVICE_NO=0,1 VALIDATE=0 ./benchmark_coproc 
