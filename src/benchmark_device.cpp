@@ -142,13 +142,6 @@ benchmark(
   }
 };
 //===----------------------------------------------------------------------===//
-std::string
-get_cuda_device_name(u32 cuda_device_no) {
-  cudaDeviceProp device_prop;
-  cudaGetDeviceProperties(&device_prop, cuda_device_no);
-  return std::string(device_prop.name);
-}
-//===----------------------------------------------------------------------===//
 int32_t main() {
   cudaDeviceSetCacheConfig(cudaFuncCachePreferShared);
 
