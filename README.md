@@ -60,7 +60,6 @@ The benchmarks are parameterized through environment variables which are describ
 #### Co-processing benchmark options
 - `HOST_BATCH_SIZE_LOG2`: the log2 of the number of keys to lookup in one go on the host side (default: 10)
 - `DEVICE_BATCH_SIZE_LOG2`: the log2 of the number of keys to lookup in one go on the device side (default: 20)
-- `BATCH_SIZE_LOG2`: the log2 of the number of keys to lookup in one go (default: 10)
 - `THREAD_CNT`: the number of CPU threads that concurrently probe the filter on the host side (default: # of available cores)
 - `CO_THREAD_CNT`: the number of CPU threads that dispatch work to a GPU (default: THREAD_CNT)
 - `DEVICE_NO`: specifies the CUDA device(s) to use. Multiple devices can be specified as a comma-separated list (default: 0)
