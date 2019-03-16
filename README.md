@@ -25,6 +25,9 @@ make -j 6
 ## Benchmarks
 - **host**: runs a CPU-only benchmark
 - **device**: runs the benchmark on a (single) GPU
+- **device_raw**: similar to **device**, but the performance 
+  measurements do NOT include any data transfers between host
+   and device.
 - **coproc**: runs the CPU-GPU co-processing benchmark 
 
 ### Options

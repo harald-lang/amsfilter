@@ -31,8 +31,8 @@ parse_filter_config(const std::string config_str) {
   return config;
 }
 //===----------------------------------------------------------------------===//
-#ifdef HAVE_CUDA
-std::string
+#if defined(HAVE_CUDA) || defined(__CUDACC__)
+static std::string
 get_cuda_device_name(u32 cuda_device_no) {
   cudaDeviceProp device_prop;
   cudaGetDeviceProperties(&device_prop, cuda_device_no);

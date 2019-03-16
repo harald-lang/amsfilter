@@ -74,21 +74,27 @@ set_target_properties(amsfilter_lite_sample
 set_target_properties(amsfilter_lite_sample PROPERTIES COMPILE_FLAGS "-march=native")
 target_link_libraries(amsfilter_lite_sample ${LIBS} amsfilter)
 
-cuda_add_executable(amsfilter_lite_benchmark_device src/benchmark_device.cpp)
-set_target_properties(amsfilter_lite_benchmark_device
+cuda_add_executable(benchmark_device src/benchmark_device.cpp)
+set_target_properties(benchmark_device
         PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-set_target_properties(amsfilter_lite_benchmark_device PROPERTIES COMPILE_FLAGS "-march=native")
-target_link_libraries(amsfilter_lite_benchmark_device ${LIBS} amsfilter)
+set_target_properties(benchmark_device PROPERTIES COMPILE_FLAGS "-march=native")
+target_link_libraries(benchmark_device ${LIBS} amsfilter)
 
-cuda_add_executable(amsfilter_lite_benchmark_host src/benchmark_host.cpp)
-set_target_properties(amsfilter_lite_benchmark_host
+cuda_add_executable(benchmark_device_raw src/benchmark_device_raw.cu)
+set_target_properties(benchmark_device_raw
         PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-set_target_properties(amsfilter_lite_benchmark_host PROPERTIES COMPILE_FLAGS "-march=native")
-target_link_libraries(amsfilter_lite_benchmark_host ${LIBS} amsfilter)
+set_target_properties(benchmark_device_raw PROPERTIES COMPILE_FLAGS "-march=native")
+target_link_libraries(benchmark_device_raw ${LIBS} amsfilter)
 
-cuda_add_executable(amsfilter_lite_benchmark_coproc src/benchmark_coproc.cpp)
-set_target_properties(amsfilter_lite_benchmark_coproc
+cuda_add_executable(benchmark_host src/benchmark_host.cpp)
+set_target_properties(benchmark_host
         PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-set_target_properties(amsfilter_lite_benchmark_coproc PROPERTIES COMPILE_FLAGS "-march=native")
-target_link_libraries(amsfilter_lite_benchmark_coproc ${LIBS} amsfilter)
+set_target_properties(benchmark_host PROPERTIES COMPILE_FLAGS "-march=native")
+target_link_libraries(benchmark_host ${LIBS} amsfilter)
+
+cuda_add_executable(benchmark_coproc src/benchmark_coproc.cpp)
+set_target_properties(benchmark_coproc
+        PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+set_target_properties(benchmark_coproc PROPERTIES COMPILE_FLAGS "-march=native")
+target_link_libraries(benchmark_coproc ${LIBS} amsfilter)
 
