@@ -4,7 +4,7 @@ project(amsfilter-samples)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -march=native -fext-numeric-literals -Wall -Wno-deprecated -Wno-endif-labels -Wno-unused-function -DSQLITE_ENABLE_JSON1 -DSQLITE_OMIT_LOAD_EXTENSION")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -march=native -fext-numeric-literals -Wall -Wno-deprecated -Wno-endif-labels -Wno-unused-function")
 
 # Database Template Library (DTL)
 include_directories(thirdparty/dtl/src)
