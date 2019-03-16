@@ -208,7 +208,7 @@ int32_t main() {
       "cuda_stream_cnt,batch_cntr,probes_per_second,word_access_cnt_per_lookup"
       << std::endl;
 
-  auto run_end_to_end_benchmark = [&](
+  auto run_benchmark = [&](
       const std::size_t m,
       const std::size_t cuda_stream_cnt) {
     benchmark(
@@ -223,7 +223,7 @@ int32_t main() {
   };
 
   for (std::size_t m : filter_sizes) {
-    run_end_to_end_benchmark(m, 4);
+    run_benchmark(m, 4);
   }
   return 0;
 }

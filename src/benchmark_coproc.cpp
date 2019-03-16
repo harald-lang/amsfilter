@@ -279,7 +279,7 @@ int32_t main() {
       "probes_per_second_total,word_access_cnt_per_lookup"
       << std::endl;
 
-  auto run_end_to_end_benchmark = [&](
+  auto run_benchmark = [&](
       const std::size_t m,
       const std::size_t thread_cnt) {
     benchmark(
@@ -296,7 +296,7 @@ int32_t main() {
   };
 
   for (std::size_t m : filter_sizes) {
-    run_end_to_end_benchmark(m, thread_cnt);
+    run_benchmark(m, thread_cnt);
   }
   return 0;
 }
