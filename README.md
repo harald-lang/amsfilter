@@ -46,6 +46,15 @@ The benchmarks are parameterized through environment variables which are describ
    
    By default, a register-blocked Bloom filter is used (=1,1,1,4). 
   
+- `GEN`: defines how the data is generated. (default: uniform)
+   1) **uniform**: generates random integers,uniformly distributed.
+   2) **markov,*f***: generates random integers using a Markov process. 
+     The parameter *f* refers to the *clustering factor* which is the average 
+     number of consecutive identical integers. For instance, the clustering
+     factor of the integer sequence *1, 1, 1, 2, 2, 3, 3, 3, 4, 4* is *2.5*, as
+     there are 4 *runs* and the total length of the sequence is 10.
+     The Markov process generates a uniformly distributed integer sequence if
+     *f = 1*. 
 - `INSERT_CNT_LOG2`: the log2 of the number of keys to insert during the build phase (default: 24)
 - `LOOKUP_CNT_LOG2`: the log2 of the number of keys to lookup during the probe phase (default: 28)
 - `KEYS_PINNED`: 0 = keys are located in pageable memory, 1 = keys are located in pinned memory (default: 1)

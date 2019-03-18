@@ -239,8 +239,10 @@ int32_t main() {
   std::vector<amsfilter::key_t> to_insert(to_insert_cnt);
   std::vector<amsfilter::key_t> to_lookup(to_lookup_cnt);
 
-  gen_data(to_insert.begin(), to_insert.end());
-  gen_data(to_lookup.begin(), to_lookup.end());
+  std::string data_gen_config_str = dtl::env<std::string>::get("GEN", "uniform");
+  auto data_gen_config = parse_datagen_config(data_gen_config_str);
+  gen_data_uniform(to_insert.begin(), to_insert.end());
+  gen_data(to_lookup.begin(), to_lookup.end(), data_gen_config);
 
 
   amsfilter::key_t* to_lookup_ptr = nullptr;
