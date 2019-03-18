@@ -58,3 +58,20 @@ class markov_process {
 
 };
 //===----------------------------------------------------------------------===//
+/// Determine the average run-length within the given range.
+template<typename It>
+static f64
+determine_clustering_factor(It begin, It end) {
+  const std::size_t length = std::distance(begin, end);
+  if (length == 0) return 0;
+  auto last_val = begin[0];
+  std::size_t run_cntr = 1;
+  for (std::size_t i = 1; i < length; i++) {
+    const auto current_val = begin[i];
+    run_cntr += last_val != current_val;
+    last_val = current_val;
+  }
+  assert(run_cntr > 0);
+  return (length * 1.0) / run_cntr;
+}
+//===----------------------------------------------------------------------===//

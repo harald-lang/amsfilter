@@ -54,7 +54,7 @@ The benchmarks are parameterized through environment variables which are describ
      factor of the integer sequence *1, 1, 1, 2, 2, 3, 3, 3, 4, 4* is *2.5*, as
      there are 4 *runs* and the total length of the sequence is 10.
      The Markov process generates a uniformly distributed integer sequence if
-     *f = 1*. 
+     *f = 1*. - Note, that the actual *f* is at most 2% off.
 - `INSERT_CNT_LOG2`: the log2 of the number of keys to insert during the build phase (default: 24)
 - `LOOKUP_CNT_LOG2`: the log2 of the number of keys to lookup during the probe phase (default: 28)
 - `KEYS_PINNED`: 0 = keys are located in pageable memory, 1 = keys are located in pinned memory (default: 1)

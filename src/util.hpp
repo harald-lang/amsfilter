@@ -5,7 +5,7 @@
 //===----------------------------------------------------------------------===//
 /// Populate the given range with random integers (uniform).
 template<typename It>
-void
+static void
 gen_data_uniform(It begin, It end) {
   std::random_device rnd_device;
   std::mt19937 gen(rnd_device());
@@ -21,7 +21,7 @@ gen_data_uniform(It begin, It end) {
 /// clustering factor which is the average number of consecutive identical
 /// integers.
 template<typename It>
-void
+static void
 gen_data_markov(It begin, It end, u32 k, f64 f) {
   markov_process mp(k, f);
   for (auto it = begin; it != end; ++it) {
@@ -30,7 +30,7 @@ gen_data_markov(It begin, It end, u32 k, f64 f) {
 }
 //===----------------------------------------------------------------------===//
 /// Parse the filter configuration.
-amsfilter::Config
+static amsfilter::Config
 parse_filter_config(const std::string config_str) {
   typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
   boost::char_separator<char> sep{","};
@@ -54,7 +54,7 @@ struct data_gen_config {
   data_dist dist;
   $f64 clustering_factor;
 };
-data_gen_config
+static data_gen_config
 parse_datagen_config(const std::string config_str) {
   typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
   boost::char_separator<char> sep{","};
@@ -78,7 +78,7 @@ parse_datagen_config(const std::string config_str) {
 //===----------------------------------------------------------------------===//
 /// Populate the given range with random integers (uniform).
 template<typename It>
-void
+static void
 gen_data(It begin, It end, const data_gen_config& config) {
   switch (config.dist) {
     case data_dist::UNIFORM:
@@ -89,9 +89,20 @@ gen_data(It begin, It end, const data_gen_config& config) {
         throw std::invalid_argument(
             "The clustering factor must not be less than 1.0.");
       }
-      gen_data_markov(begin, end,
-          std::numeric_limits<$i32>::max(), config.clustering_factor);
-      break;
+      f64 f_desired = config.clustering_factor;
+      f64 max_error = f_desired * 0.02; // 2%
+      const std::size_t max_tries = 1000;
+      for (std::size_t i = 0; i < max_tries; ++i) {
+        gen_data_markov(begin, end,
+            std::numeric_limits<$i32>::max(), config.clustering_factor);
+        f64 f_actual = determine_clustering_factor(begin, end);
+        if (f_actual >= (f_desired - max_error)
+            && f_actual <= (f_desired + max_error)) {
+          return;
+        }
+      }
+      throw std::runtime_error(
+          "Failed to generate random data within error bounds.");
   }
 }
 //===----------------------------------------------------------------------===//
