@@ -165,8 +165,8 @@ int32_t main() {
      512ull * 1024 * 1024 * 8
   };
 
-  std::cout << "word_cnt,sector_cnt,zone_cnt,k,m,probe_cnt,batch_size,"
-      "cuda_stream_cnt,batch_cntr,probes_per_second,word_access_cnt_per_lookup"
+  std::cout << "word_cnt,sector_cnt,zone_cnt,k,m,"
+      "probes_per_second,word_access_cnt_per_lookup"
       << std::endl;
 
   auto run_benchmark = [&](const std::size_t m) {
