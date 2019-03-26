@@ -9,7 +9,7 @@ This repository contains benchmarks for the AMS-Filter, a high-performance
 - A CPU with AVX2 support (or AVX-512). E.g, AMD Ryzen, Intel Haswell (or later)
 - [CUDA](https://developer.nvidia.com/cuda-toolkit) v9.0 or later.
 - A C++14-capable compiler compatible with your version of CUDA.
-
+- The [Boost C++ Libraries](https://www.boost.org/), version 1.58 or later 
 
 ## Building
 ```
@@ -47,7 +47,7 @@ The benchmarks are parameterized through environment variables which are describ
    By default, a register-blocked Bloom filter is used (=1,1,1,4). 
   
 - `GEN`: defines how the data is generated. (default: uniform)
-   1) **uniform**: generates random integers,uniformly distributed.
+   1) **uniform**: generates random integers, uniformly distributed.
    2) **markov,*f***: generates random integers using a Markov process. 
      The parameter *f* refers to the *clustering factor* which is the average 
      number of consecutive identical integers. For instance, the clustering
