@@ -4,18 +4,21 @@ project(amsfilter-samples)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -march=native -fext-numeric-literals -Wall -Wno-deprecated -Wno-endif-labels -Wno-unused-function")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fext-numeric-literals -Wall -Wno-deprecated -Wno-endif-labels -Wno-unused-function")
 
 # Database Template Library (DTL)
 include_directories(thirdparty/dtl/src)
 include_directories(thirdparty/dtl/thirdparty)
+
+# The target architecture.
+set(TARGET_ARCH "native")
 
 # Include the AMS-Filter.
 set(AMSFILTER_NO_MAGIC 1) # Disables MAGIC addressing.
 set(AMSFILTER_PARTIAL_BUILD 0) # Compiles only a small number of filters.
 add_subdirectory(thirdparty/dtl/amsfilter amsfilter)
 include_directories(thirdparty/dtl/amsfilter/src)
-set_target_properties(amsfilter PROPERTIES COMPILE_FLAGS "-march=native")
+set_target_properties(amsfilter PROPERTIES COMPILE_FLAGS "-march=${TARGET_ARCH}")
 
 set(LIBS
         pthread
@@ -71,30 +74,30 @@ endif()
 cuda_add_executable(amsfilter_lite_sample src/amsfilter_lite_sample.cpp)
 set_target_properties(amsfilter_lite_sample
         PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-set_target_properties(amsfilter_lite_sample PROPERTIES COMPILE_FLAGS "-march=native")
+set_target_properties(amsfilter_lite_sample PROPERTIES COMPILE_FLAGS "-march=${TARGET_ARCH}")
 target_link_libraries(amsfilter_lite_sample ${LIBS} amsfilter)
 
 cuda_add_executable(benchmark_device src/benchmark_device.cpp)
 set_target_properties(benchmark_device
         PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-set_target_properties(benchmark_device PROPERTIES COMPILE_FLAGS "-march=native")
+set_target_properties(benchmark_device PROPERTIES COMPILE_FLAGS "-march=${TARGET_ARCH}")
 target_link_libraries(benchmark_device ${LIBS} amsfilter)
 
 cuda_add_executable(benchmark_device_raw src/benchmark_device_raw.cu)
 set_target_properties(benchmark_device_raw
         PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-set_target_properties(benchmark_device_raw PROPERTIES COMPILE_FLAGS "-march=native")
+set_target_properties(benchmark_device_raw PROPERTIES COMPILE_FLAGS "-march=${TARGET_ARCH}")
 target_link_libraries(benchmark_device_raw ${LIBS} amsfilter)
 
 cuda_add_executable(benchmark_host src/benchmark_host.cpp)
 set_target_properties(benchmark_host
         PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-set_target_properties(benchmark_host PROPERTIES COMPILE_FLAGS "-march=native")
+set_target_properties(benchmark_host PROPERTIES COMPILE_FLAGS "-march=${TARGET_ARCH}")
 target_link_libraries(benchmark_host ${LIBS} amsfilter)
 
 cuda_add_executable(benchmark_coproc src/benchmark_coproc.cpp)
 set_target_properties(benchmark_coproc
         PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-set_target_properties(benchmark_coproc PROPERTIES COMPILE_FLAGS "-march=native")
+set_target_properties(benchmark_coproc PROPERTIES COMPILE_FLAGS "-march=${TARGET_ARCH}")
 target_link_libraries(benchmark_coproc ${LIBS} amsfilter)
 
