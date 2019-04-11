@@ -159,7 +159,8 @@ int32_t main() {
 
   int32_t cuda_device_no = dtl::env<int32_t>::get("DEVICE_NO", 0);
   std::cout << "using CUDA device no. " << cuda_device_no
-      << " (" << get_cuda_device_name(cuda_device_no) << ")" << std::endl;
+      << " (" << amsfilter::cuda::get_cuda_device_name(cuda_device_no)
+      << ")" << std::endl;
 
   std::size_t to_insert_cnt_log2 = dtl::env<std::size_t>::get("INSERT_CNT_LOG2", 24);
   std::size_t to_insert_cnt = 1ull << to_insert_cnt_log2;

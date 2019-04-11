@@ -215,7 +215,8 @@ int32_t main() {
   for (auto& device_no : devices_tok) {
     devices.push_back(u32(std::stoul(device_no)));
     std::cout << " " << devices.back();
-    std::cout << " (" << get_cuda_device_name(devices.back()) << ") ";
+    std::cout << " (" << amsfilter::cuda::get_cuda_device_name(devices.back())
+        << ") ";
   }
   std::cout << std::endl;
 
